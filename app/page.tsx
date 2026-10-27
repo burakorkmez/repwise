@@ -34,6 +34,12 @@ const save = (next: Habit[]) => {
   dispatchEvent(new StorageEvent("storage"));
 };
 
+const toggleTheme = () => {
+  const root = document.documentElement;
+  root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
+  localStorage.setItem("theme", root.dataset.theme);
+};
+
 export default function Home() {
   const [name, setName] = useState("");
   const json = useSyncExternalStore(subscribe, () => localStorage.getItem(KEY) ?? "[]", () => null);
@@ -61,7 +67,16 @@ export default function Home() {
 
   return (
     <main className="mx-auto w-full max-w-xl p-6">
-      <h1 className="mb-6 text-2xl font-semibold">Repwise</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Repwise</h1>
+        <button
+          onClick={toggleTheme}
+          aria-label="Toggle dark mode"
+          className="rounded border border-zinc-300 px-3 py-1 dark:border-zinc-700"
+        >
+          ◐
+        </button>
+      </div>
 
       <form className="mb-6 flex gap-2" onSubmit={add}>
         <input
