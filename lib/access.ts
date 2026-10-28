@@ -6,3 +6,7 @@ export const canWatchLesson = ({ isPreview, isOwner, hasPurchase }: { isPreview:
 
 // Any paid purchase from a trainer earns one (editable) review; nobody reviews themselves
 export const canReview = ({ isSelf, hasPurchase }: { isSelf: boolean; hasPurchase: boolean }) => !isSelf && hasPurchase
+
+// DMs are client↔trainer or trainer↔trainer; clients can't cold-message each other, and nobody DMs themselves
+export const canMessage = ({ isSelf, roles }: { isSelf: boolean; roles: ["client" | "trainer", "client" | "trainer"] }) =>
+  !isSelf && roles.includes("trainer")

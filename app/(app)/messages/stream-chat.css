@@ -1,0 +1,75 @@
+/* Unlayered on purpose: in a layer, Tailwind's preflight could outrank it whenever this chunk loads before
+   globals.css (layer priority follows first declaration). Stream only targets its own classes, so nothing leaks. */
+@import "stream-chat-react/dist/css/index.css";
+
+/* Must come after the import (same specificity, later wins). Stream reads our tokens, so its UI follows the site palette in both themes */
+.str-chat {
+  --str-chat__font-family: var(--font-inter), system-ui, sans-serif;
+  --str-chat__accent-primary: var(--primary);
+  --str-chat__text-on-accent: var(--primary-foreground);
+  --str-chat__text-primary: var(--foreground);
+  --str-chat__text-secondary: var(--muted-foreground);
+  --str-chat__text-link: var(--primary);
+  --str-chat__background-core-app: var(--background);
+  --str-chat__background-core-elevation-0: var(--background);
+  --str-chat__background-core-elevation-1: var(--background);
+  --str-chat__background-core-elevation-2: var(--popover);
+  --str-chat__background-core-surface-default: var(--muted);
+  --str-chat__border-core-default: var(--border);
+  --str-chat__border-utility-focused: var(--ring);
+  --str-chat__chat-bg-outgoing: var(--primary);
+  --str-chat__chat-text-outgoing: var(--primary-foreground);
+  --str-chat__chat-bg-incoming: var(--muted);
+  --str-chat__chat-text-incoming: var(--foreground);
+}
+
+/* Layout: list | conversation | thread, under the site header */
+.repwise-chat {
+  display: flex;
+  height: calc(100dvh - 4rem - 1px); /* site header: h-16 + border */
+}
+.repwise-chat__list {
+  flex: 0 0 320px;
+  min-width: 0;
+  border-inline-end: 1px solid var(--border);
+}
+.repwise-chat__list .str-chat__channel-list {
+  min-width: 0;
+}
+.repwise-chat > .str-chat__channel {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Phones: one pane at a time, the list or the conversation */
+@media (max-width: 767px) {
+  .repwise-chat__list {
+    flex-basis: 100%;
+    border: 0;
+  }
+  .repwise-chat__list .str-chat__channel-list {
+    position: static;
+    visibility: visible;
+    pointer-events: auto;
+    transform: none;
+    width: 100%;
+  }
+  .repwise-chat[data-list-open="false"] .repwise-chat__list,
+  .repwise-chat[data-list-open="true"] > .str-chat__channel {
+    display: none;
+  }
+}
+
+/* Under xl an open thread takes over the conversation pane (Stream does this itself below md) */
+@media (min-width: 768px) and (max-width: 1279px) {
+  .str-chat__channel .str-chat__container:has(.str-chat__thread-container) > .str-chat__main-panel,
+  .str-chat__channel .str-chat__container:has(.str-chat__thread-container) > .str-chat__dropzone-root:not(.str-chat__dropzone-root--thread) {
+    display: none;
+  }
+}
+@media (min-width: 1280px) {
+  .str-chat__channel .str-chat__container > .str-chat__thread-container,
+  .str-chat__channel .str-chat__container > .str-chat__dropzone-root--thread {
+    flex: 0 0 360px;
+  }
+}

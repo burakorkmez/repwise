@@ -1,0 +1,13 @@
+/* Unlayered on purpose, see app/(app)/messages/stream-chat.css; overrides follow the import */
+@import "@stream-io/video-react-sdk/dist/css/styles.css";
+
+.str-video {
+  /* The SDK theme is dark like this page; only the accent becomes ours */
+  --str-video__primary-color: var(--primary);
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+.repwise-call {
+  height: 100%;
+  background: transparent;
+}
