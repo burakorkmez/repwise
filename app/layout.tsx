@@ -1,38 +1,34 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Kaushan_Script, Outfit } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
+const outfit = Outfit({ variable: "--font-outfit", subsets: ["latin"] });
+const kaushan = Kaushan_Script({ variable: "--font-kaushan", subsets: ["latin"], weight: "400" });
 
 export const metadata: Metadata = {
-  title: "Repwise",
-  description: "Simple habit tracker",
+  title: { default: "Repwise — Train with the best", template: "%s · Repwise" },
+  description:
+    "Find elite personal trainers, follow their video programs, and book 1:1 coaching sessions.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      data-theme="dark"
+      className={`${inter.variable} ${outfit.variable} ${kaushan.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
-        {/* Set theme before paint: saved choice, else system preference */}
+        {/* Apply the saved theme before paint; dark is the default */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{document.documentElement.dataset.theme=localStorage.getItem("theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")}catch(e){}`,
+            __html: `try{document.documentElement.dataset.theme=localStorage.getItem("theme")||"dark"}catch(e){}`,
           }}
         />
       </head>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">{children}</body>
     </html>
   );
 }
