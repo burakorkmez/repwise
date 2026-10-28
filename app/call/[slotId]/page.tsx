@@ -6,13 +6,13 @@ import { Suspense } from "react"
 import { MessageCircle, Mic, MicOff, MonitorUp, PhoneOff, Video } from "lucide-react"
 import { Logo } from "@/components/logo"
 import { Skeleton } from "@/components/ui/skeleton"
+import { LocalTime } from "@/components/local-time"
 import { UserAvatar } from "@/components/user-avatar"
-import { getSlot, getTrainer, me, person, slots } from "@/lib/mock-data"
-import { cn, formatDate } from "@/lib/utils"
+import { requireUser } from "@/lib/auth"
+import { getCallSlot } from "@/lib/queries"
+import { cn } from "@/lib/utils"
 
 export const metadata: Metadata = { title: "Session" }
-
-export const generateStaticParams = () => slots.filter((s) => s.status === "booked").map((s) => ({ slotId: s.id }))
 
 // ponytail: static call room; Phase 9 swaps the tiles and controls for @stream-io/video-react-sdk
 export default function CallPage({ params }: PageProps<"/call/[slotId]">) {
@@ -24,13 +24,13 @@ export default function CallPage({ params }: PageProps<"/call/[slotId]">) {
 }
 
 async function CallRoom({ params }: Pick<PageProps<"/call/[slotId]">, "params">) {
-  const slot = getSlot((await params).slotId)
-  if (!slot || slot.status !== "booked") notFound()
+  const [slot, me] = await Promise.all([getCallSlot((await params).slotId), requireUser()])
+  // Only the two people in a booked session get in; everyone else sees a 404
+  if (!slot || slot.status !== "booked" || (me.id !== slot.clientId && me.id !== slot.trainerId)) notFound()
 
-  const trainer = getTrainer(slot.trainerId)!
-  const client = person(slot.clientId!)!
-  // Mock viewer: Alex on Alex's bookings, otherwise the trainer
-  const asClient = slot.clientId === me.id
+  const trainer = { id: slot.trainerId, name: slot.trainerName, avatarUrl: slot.trainerAvatarUrl }
+  const client = { id: slot.clientId!, name: slot.clientName!, avatarUrl: slot.clientAvatarUrl }
+  const asClient = me.id === slot.clientId
   const remote = asClient ? trainer : client
   const self = asClient ? client : trainer
 
@@ -46,7 +46,7 @@ async function CallRoom({ params }: Pick<PageProps<"/call/[slotId]">, "params">)
             1:1 session · {trainer.name} & {client.name}
           </p>
           <p className="text-xs text-muted-foreground">
-            {formatDate(slot.startsAt, { weekday: "long", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })} · 60 min
+            <LocalTime date={slot.startsAt} format={{ weekday: "long", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }} /> · 60 min
           </p>
         </div>
         <span className="ml-auto flex items-center gap-2 rounded-full bg-red-500/15 px-3 py-1.5 text-xs font-medium text-red-400">

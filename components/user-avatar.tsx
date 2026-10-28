@@ -7,7 +7,7 @@ export function UserAvatar({
   className,
 }: {
   name: string
-  src?: string
+  src?: string | null
   className?: string
 }) {
   return (

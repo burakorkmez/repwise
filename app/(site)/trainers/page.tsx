@@ -6,7 +6,7 @@ import { TrainerCard } from "@/components/cards"
 import { EmptyState } from "@/components/empty-state"
 import { buttonVariants } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { trainers } from "@/lib/mock-data"
+import { listTrainers } from "@/lib/queries"
 import { specialties } from "@/lib/specialties"
 import { cn } from "@/lib/utils"
 
@@ -29,8 +29,8 @@ export default function TrainersPage({ searchParams }: PageProps<"/trainers">) {
 
 async function Directory({ searchParams }: Pick<PageProps<"/trainers">, "searchParams">) {
   const { specialty } = await searchParams
-  const active = typeof specialty === "string" ? specialty : undefined
-  const list = active ? trainers.filter((t) => t.specialties.includes(active)) : trainers
+  const active = specialties.find((s) => s.slug === specialty)?.slug
+  const list = await listTrainers({ specialty: active })
 
   return (
     <>

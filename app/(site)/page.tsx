@@ -13,11 +13,13 @@ import {
   Quote,
   Video,
 } from "lucide-react"
+import { Suspense } from "react"
 import { ProgramCard, TrainerCard } from "@/components/cards"
 import { Stars } from "@/components/rating"
 import { buttonVariants } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import { UserAvatar } from "@/components/user-avatar"
-import { getTrainer, person, programs, reviews, trainers } from "@/lib/mock-data"
+import { featuredReviews, listTrainers, publishedPrograms } from "@/lib/queries"
 import { specialties } from "@/lib/specialties"
 import { cn } from "@/lib/utils"
 
@@ -43,8 +45,6 @@ const features = [
 const glow = "shadow-[0_0_32px_-6px] shadow-primary/70"
 
 export default function HomePage() {
-  const featured = [reviews[0], reviews[3], reviews[9]]
-
   return (
     <>
       {/* Hero stays dark in both themes: it sits on a dark photo */}
@@ -75,10 +75,7 @@ export default function HomePage() {
               <Link href="/trainers" className={cn(buttonVariants({ size: "xl" }), glow)}>
                 Find your trainer <ArrowRight />
               </Link>
-              <Link
-                href="/programs/strength-foundations"
-                className={buttonVariants({ size: "xl", variant: "outline" })}
-              >
+              <Link href="#programs" className={buttonVariants({ size: "xl", variant: "outline" })}>
                 <CirclePlay /> Watch a free lesson
               </Link>
             </div>
@@ -150,9 +147,9 @@ export default function HomePage() {
         <div className="shell">
           <SectionHeader title="Meet your coaches" text="Certified pros who've helped thousands get results." href="/trainers" cta="View all trainers" />
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {trainers.slice(0, 4).map((t) => (
-              <TrainerCard key={t.id} trainer={t} />
-            ))}
+            <Suspense fallback={<CardsSkeleton count={4} className="aspect-4/5" />}>
+              <FeaturedTrainers />
+            </Suspense>
           </div>
         </div>
       </section>
@@ -189,15 +186,12 @@ export default function HomePage() {
       </section>
 
       {/* Programs */}
-      <section className="shell py-12">
-        <SectionHeader title="Training programs" text="Goal-based plans designed by experts. Real results for real people." href="/trainers" cta="Browse coaches" />
+      <section id="programs" className="shell scroll-mt-20 py-12">
+        <SectionHeader title="Training programs" text="Goal-based plans designed by experts. Watch the first lesson of any program free." href="/trainers" cta="Browse coaches" />
         <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {programs
-            .filter((p) => p.published)
-            .slice(0, 6)
-            .map((p) => (
-              <ProgramCard key={p.id} program={p} />
-            ))}
+          <Suspense fallback={<CardsSkeleton count={3} className="aspect-4/3" />}>
+            <LatestPrograms />
+          </Suspense>
         </div>
       </section>
 
@@ -205,23 +199,9 @@ export default function HomePage() {
       <section className="shell py-20">
         <SectionHeader title="Real people. Real results." text="Thousands of clients have transformed their training with Repwise." />
         <div className="mt-10 grid gap-5 md:grid-cols-3">
-          {featured.map((r) => {
-            const client = person(r.clientId)!
-            return (
-              <figure key={r.id} className="flex flex-col rounded-2xl border bg-card p-6">
-                <Quote className="size-6 text-primary" />
-                <blockquote className="mt-4 flex-1 text-[15px] leading-relaxed">“{r.comment}”</blockquote>
-                <figcaption className="mt-6 flex items-center gap-3">
-                  <UserAvatar name={client.name} className="size-10" />
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold">{client.name}</p>
-                    <p className="text-xs text-muted-foreground">Trained with {getTrainer(r.trainerId)!.name}</p>
-                  </div>
-                  <Stars value={r.rating} />
-                </figcaption>
-              </figure>
-            )
-          })}
+          <Suspense fallback={<CardsSkeleton count={3} className="h-56" />}>
+            <Testimonials />
+          </Suspense>
         </div>
       </section>
 
@@ -265,6 +245,38 @@ export default function HomePage() {
       </section>
     </>
   )
+}
+
+async function FeaturedTrainers() {
+  const trainers = await listTrainers({ limit: 4 })
+  return trainers.map((t) => <TrainerCard key={t.id} trainer={t} />)
+}
+
+async function LatestPrograms() {
+  const programs = await publishedPrograms(6)
+  return programs.map((p) => <ProgramCard key={p.id} program={p} />)
+}
+
+async function Testimonials() {
+  const reviews = await featuredReviews()
+  return reviews.map((r) => (
+    <figure key={r.id} className="flex flex-col rounded-2xl border bg-card p-6">
+      <Quote className="size-6 text-primary" />
+      <blockquote className="mt-4 flex-1 text-[15px] leading-relaxed">“{r.comment}”</blockquote>
+      <figcaption className="mt-6 flex items-center gap-3">
+        <UserAvatar name={r.clientName} src={r.clientAvatarUrl} className="size-10" />
+        <div className="flex-1">
+          <p className="text-sm font-semibold">{r.clientName}</p>
+          <p className="text-xs text-muted-foreground">Trained with {r.trainerName}</p>
+        </div>
+        <Stars value={r.rating} />
+      </figcaption>
+    </figure>
+  ))
+}
+
+function CardsSkeleton({ count, className }: { count: number; className: string }) {
+  return Array.from({ length: count }, (_, i) => <Skeleton key={i} className={cn("rounded-2xl", className)} />)
 }
 
 function SectionHeader({ title, text, href, cta }: { title: string; text: string; href?: string; cta?: string }) {

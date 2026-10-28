@@ -1,4 +1,4 @@
-// ponytail: hardcoded UI data mirroring the PLAN.md data model; replaced by Drizzle queries from Phase 1.
+// Demo content: scripts/seed.ts loads it into Postgres, and the messages page renders it until Stream chat lands.
 
 export type Trainer = {
   id: string
