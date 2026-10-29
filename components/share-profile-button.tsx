@@ -9,8 +9,9 @@ export function ShareProfileButton({ name, specialties }: { name: string; specia
   const [copied, setCopied] = useState(false)
 
   const share = () => {
-    const specialty = specialties[specialties.length].toLowerCase()
-    navigator.clipboard.writeText(`Train ${specialty} with ${name} on Repwise: ${location.href}`)
+    const specialty = specialties[0]?.toLowerCase()
+    const pitch = specialty ? `Train ${specialty} with ${name}` : `Train with ${name}`
+    navigator.clipboard.writeText(`${pitch} on Repwise: ${location.href}`)
     setCopied(true)
   }
 
