@@ -7,6 +7,9 @@ const toggle = () => {
   const root = document.documentElement
   root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark"
   localStorage.setItem("theme", root.dataset.theme)
+  // Keep the browser UI (mobile address bar) in step with the theme
+  document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')!.content =
+    root.dataset.theme === "dark" ? "#0a0a0a" : "#ffffff"
 }
 
 // Icon swaps via CSS so server and client markup always match
