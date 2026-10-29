@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs/config";
 
 // ponytail: Cloudways deploys don't delete files removed from git, so the old habit-tracker
 // app/page.tsx lingers on the server and shadows app/(site)/page.tsx at "/". Remove it before
@@ -26,4 +27,13 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: "codesistency-gs",
+  project: "repwise",
+  // Build-time secret for source map upload; without it the build still works, just no upload
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  widenClientFileUpload: true,
+  // Send browser events through /monitoring so ad-blockers don't drop them
+  tunnelRoute: "/monitoring",
+  silent: !process.env.CI,
+});
