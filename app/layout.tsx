@@ -22,10 +22,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
     >
       <head>
-        {/* Apply the saved theme before paint; dark is the default */}
+        <meta name="theme-color" content="#0a0f0d" />
+        {/* Apply the saved theme (and matching browser UI color) before paint; dark is the default */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{document.documentElement.dataset.theme=localStorage.getItem("theme")||"dark"}catch(e){}`,
+            __html: `try{var t=localStorage.getItem("theme")||"dark";document.documentElement.dataset.theme=t;var m=document.querySelector('meta[name="theme-color"]');if(m)m.content=t==="light"?"#f8fbf9":"#0a0f0d"}catch(e){}`,
           }}
         />
       </head>
