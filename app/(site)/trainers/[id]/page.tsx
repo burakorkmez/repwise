@@ -10,6 +10,7 @@ import { ProgramCard } from "@/components/cards"
 import { LiveSlots } from "@/components/live-slots"
 import { LocalTime } from "@/components/local-time"
 import { Rating, Stars } from "@/components/rating"
+import { ShareProfileButton } from "@/components/share-profile-button"
 import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -98,6 +99,7 @@ async function Trainer({ params }: Pick<Props, "params">) {
             </div>
             {!isSelf && (
               <div className="flex gap-2">
+                <ShareProfileButton name={trainer.name} specialties={trainer.specialties ?? []} />
                 <Link href={`/messages?c=${trainer.id}`} className={buttonVariants({ size: "xl", variant: "outline" })}>
                   <MessageCircle /> Message
                 </Link>
