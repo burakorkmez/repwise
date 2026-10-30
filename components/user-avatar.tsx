@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { cn, initials } from "@/lib/utils"
+import { avatarUrl, cn, initials } from "@/lib/utils"
 
 export function UserAvatar({
   name,
@@ -12,8 +12,8 @@ export function UserAvatar({
 }) {
   return (
     <Avatar className={cn("overflow-hidden", className)}>
-      {/* Photos are 4:5 portraits; zoom toward the face so small avatars read well */}
-      {src && <AvatarImage src={src} alt={name} className="origin-[50%_30%] scale-[1.6] object-top" />}
+      {/* ImageKit crops to the face (fo-face), so 4:5 portraits read well at avatar size */}
+      {src && <AvatarImage src={avatarUrl(src)} alt={name} />}
       <AvatarFallback className="bg-accent font-semibold text-accent-foreground">
         {initials(name)}
       </AvatarFallback>

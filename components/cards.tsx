@@ -1,11 +1,11 @@
-import Image from "next/image"
 import Link from "next/link"
+import { Image } from "@imagekit/next"
 import { ArrowRight, Dumbbell, Play } from "lucide-react"
 import { Rating } from "@/components/rating"
 import { UserAvatar } from "@/components/user-avatar"
 import type { ProgramSummary, TrainerSummary } from "@/lib/queries"
 import { specialtyLabel } from "@/lib/specialties"
-import { initials, money } from "@/lib/utils"
+import { imageProps, initials, money } from "@/lib/utils"
 
 export function TrainerCard({ trainer }: { trainer: TrainerSummary }) {
   return (
@@ -16,7 +16,7 @@ export function TrainerCard({ trainer }: { trainer: TrainerSummary }) {
       <div className="relative aspect-4/5">
         {trainer.avatarUrl ? (
           <Image
-            src={trainer.avatarUrl}
+            {...imageProps(trainer.avatarUrl, [{ width: 400, height: 500 }])}
             alt={trainer.name}
             fill
             sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
@@ -64,9 +64,8 @@ export function TrainerCard({ trainer }: { trainer: TrainerSummary }) {
 
 export function ProgramCover({ program, sizes, className }: { program: Pick<ProgramSummary, "coverUrl">; sizes: string; className?: string }) {
   return program.coverUrl ? (
-    <Image src={program.coverUrl} alt="" fill sizes={sizes} className={className ?? "object-cover"} />
+    <Image {...imageProps(program.coverUrl)} alt="" fill sizes={sizes} className={className ?? "object-cover"} />
   ) : (
-    // ponytail: covers upload through ImageKit later; until then a program without one gets this tile
     <span className="absolute inset-0 grid place-items-center bg-linear-to-br from-accent to-muted text-accent-foreground">
       <Dumbbell className="size-8" />
     </span>

@@ -15,8 +15,6 @@ const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
-  // Google sign-ups keep their Google photo as avatar
-  images: { remotePatterns: [{ protocol: "https", hostname: "lh3.googleusercontent.com" }] },
   turbopack: {
     rules: {
       "*.css": {

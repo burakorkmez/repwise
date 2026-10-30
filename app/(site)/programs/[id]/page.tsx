@@ -13,8 +13,10 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { UserAvatar } from "@/components/user-avatar"
 import { canWatchLesson } from "@/lib/access"
 import { getUser } from "@/lib/auth"
+import { fileUrl } from "@/lib/imagekit"
 import { getProgram, getTrainer, ownsProgram } from "@/lib/queries"
-import { cn, money } from "@/lib/utils"
+import { cn, imageUrl, money } from "@/lib/utils"
+import { LessonPlayer } from "./lesson-player"
 
 type Props = PageProps<"/programs/[id]">
 type Program = NonNullable<Awaited<ReturnType<typeof getProgram>>>
@@ -154,7 +156,6 @@ async function ProgramView({ params, searchParams }: Props) {
   )
 }
 
-// ponytail: placeholder player; the ImageKit Video Player with a signed URL replaces the play button
 async function Player({ program, access, searchParams }: { program: Program; access: Access; searchParams: Props["searchParams"] }) {
   const lesson = await currentLesson(program, searchParams)
   const open = lesson && unlocked(program, lesson.id, access)
@@ -169,25 +170,21 @@ async function Player({ program, access, searchParams }: { program: Program; acc
       />
       {!lesson ? (
         <p className="absolute inset-0 grid place-items-center text-white/70">No lessons yet</p>
+      ) : open && lesson.videoPath ? (
+        <LessonPlayer
+          lessonId={lesson.id}
+          src={fileUrl(lesson.videoPath)}
+          poster={program.coverUrl ? imageUrl(program.coverUrl, [{ width: 1280 }]) : undefined}
+        />
       ) : open ? (
         <>
           <div className="absolute inset-0 -z-10 bg-linear-to-t from-black/80 via-transparent to-black/20" />
-          <button
-            aria-label="Play lesson"
-            className="absolute inset-0 m-auto grid size-14 place-items-center rounded-full bg-primary text-primary-foreground shadow-[0_0_48px_-4px] shadow-primary/70 transition hover:scale-105 sm:size-20"
-          >
-            <Play className="ml-1 size-6 fill-current sm:size-8" />
-          </button>
-          <div className="absolute inset-x-0 bottom-0 hidden p-5 sm:block">
-            <p className="text-sm font-medium">
-              Lesson {number} · {lesson.title}
-            </p>
-            <div className="mt-3 h-1 rounded-full bg-white/20">
-              <div className="h-full w-0 rounded-full bg-primary" />
-            </div>
-            <div className="mt-2 flex justify-between text-xs text-white/60">
-              <span>0:00</span>
-              <span>HD · Adaptive streaming</span>
+          <div className="absolute inset-0 grid place-items-center p-6 text-center">
+            <div>
+              <p className="text-xl font-semibold">No video yet</p>
+              <p className="mt-1 text-sm text-white/70">
+                Lesson {number} · {lesson.title}
+              </p>
             </div>
           </div>
         </>

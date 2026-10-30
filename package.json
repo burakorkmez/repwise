@@ -14,6 +14,9 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
+    "@imagekit/javascript": "^5.5.1",
+    "@imagekit/next": "^2.1.6",
+    "@imagekit/video-player": "1.0.0-beta.6",
     "@neon/config": "^1.9.5",
     "@neon/env": "^1.6.6",
     "@neon/realtime": "^0.1.2",
@@ -49,5 +52,11 @@
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "^5"
+  },
+  "overrides": {
+    "@imagekit/video-player": {
+      "react": "$react",
+      "react-dom": "$react-dom"
+    }
   }
 }

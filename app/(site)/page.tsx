@@ -1,5 +1,5 @@
-import Image from "next/image"
 import Link from "next/link"
+import { Image } from "@imagekit/next"
 import {
   ArrowRight,
   CalendarCheck,
@@ -21,7 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { UserAvatar } from "@/components/user-avatar"
 import { featuredReviews, listTrainers, publishedPrograms } from "@/lib/queries"
 import { specialties } from "@/lib/specialties"
-import { cn } from "@/lib/utils"
+import { cn, imageProps } from "@/lib/utils"
 
 const stats = [
   { value: "120+", label: "Elite coaches" },
@@ -50,7 +50,7 @@ export default function HomePage() {
       {/* Hero stays dark in both themes: it sits on a dark photo */}
       <section data-theme="dark" className="relative isolate overflow-hidden bg-background text-foreground">
         <Image
-          src="/images/hero.jpg"
+          {...imageProps("/images/hero.jpg")}
           alt=""
           fill
           loading="eager"
@@ -210,7 +210,7 @@ export default function HomePage() {
         <div data-theme="dark" className="relative isolate overflow-hidden rounded-3xl border bg-background text-foreground">
           <div className="absolute inset-y-0 left-0 -z-10 w-full md:w-1/2">
             <Image
-              src="/images/trainers/leo-novak.jpg"
+              {...imageProps("/images/trainers/leo-novak.jpg")}
               alt=""
               fill
               sizes="(min-width: 768px) 40rem, 100vw"
@@ -300,7 +300,7 @@ function CallPreview() {
   return (
     <div className="relative mx-auto w-full max-w-lg pb-10 lg:pb-0">
       <div data-theme="dark" className="relative aspect-4/5 overflow-hidden rounded-3xl border bg-background text-foreground shadow-2xl shadow-primary/10">
-        <Image src="/images/trainers/maya-chen.jpg" alt="" fill sizes="32rem" className="object-cover" />
+        <Image {...imageProps("/images/trainers/maya-chen.jpg")} alt="" fill sizes="32rem" className="object-cover" />
         <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-black/30" />
         <div className="absolute top-4 left-4 flex items-center gap-2 rounded-full bg-black/50 px-3 py-1.5 text-xs font-medium backdrop-blur">
           <span className="size-2 animate-pulse rounded-full bg-red-500" /> Live · 24:13

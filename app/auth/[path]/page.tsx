@@ -1,12 +1,13 @@
 import type { Metadata } from "next"
-import Image from "next/image"
 import { notFound } from "next/navigation"
 import { Suspense } from "react"
+import { Image } from "@imagekit/next"
 import { AuthView } from "@neondatabase/auth/react/ui"
 import { authViewPaths } from "@neondatabase/auth/react/ui/server"
 import { Logo } from "@/components/logo"
 import { Stars } from "@/components/rating"
 import { Skeleton } from "@/components/ui/skeleton"
+import { imageProps } from "@/lib/utils"
 
 type Props = PageProps<"/auth/[path]">
 
@@ -21,7 +22,7 @@ export default function AuthPage({ params }: Props) {
   return (
     <div className="grid min-h-dvh lg:grid-cols-2">
       <div data-theme="dark" className="relative isolate hidden flex-col justify-between bg-background p-10 text-foreground lg:flex">
-        <Image src="/images/programs/strength-foundations.jpg" alt="" fill loading="eager" sizes="50vw" className="-z-10 object-cover" />
+        <Image {...imageProps("/images/programs/strength-foundations.jpg")} alt="" fill loading="eager" sizes="50vw" className="-z-10 object-cover" />
         <div className="absolute inset-0 -z-10 bg-linear-to-t from-black via-black/40 to-black/30" />
         <Logo />
         <figure className="max-w-md">

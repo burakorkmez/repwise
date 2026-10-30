@@ -2,8 +2,8 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { Suspense } from "react"
-import { ArrowLeft, CircleDashed, Eye, ImagePlus, Plus, Trash2 } from "lucide-react"
-import { addLesson, createProgram, deleteLesson, deleteProgram, updateProgram } from "@/app/actions/programs"
+import { ArrowLeft, CircleCheck, CircleDashed, Eye, ImagePlus, Plus, Trash2, Upload } from "lucide-react"
+import { addLesson, createProgram, deleteLesson, deleteProgram, setCover, setLessonVideo, updateProgram } from "@/app/actions/programs"
 import { ActionForm, SubmitButton } from "@/components/action-form"
 import { ProgramCover } from "@/components/cards"
 import { PageHeader } from "@/components/page-header"
@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
+import { MB, Uploader } from "@/components/uploader"
 import { requireTrainer } from "@/lib/auth"
 import { getProgram } from "@/lib/queries"
 import { money } from "@/lib/utils"
@@ -128,10 +129,21 @@ function EditProgram({ program }: { program: Program }) {
                     <span className="grid size-7 shrink-0 place-items-center rounded-full bg-muted text-xs font-semibold">{i + 1}</span>
                     <span className="min-w-0 flex-1 truncate text-sm font-medium">{l.title}</span>
                     {i === 0 && <Badge variant="secondary">Free preview</Badge>}
-                    {/* ponytail: every lesson reads "No video" until ImageKit uploads fill videoPath */}
                     <span className="hidden items-center gap-1 text-xs text-muted-foreground sm:flex">
-                      <CircleDashed className="size-3.5" /> {l.videoPath ? "Ready" : "No video"}
+                      {l.videoPath ? <CircleCheck className="size-3.5 text-primary" /> : <CircleDashed className="size-3.5" />}
+                      {l.videoPath ? "Ready" : "No video"}
                     </span>
+                    <Uploader
+                      private
+                      accept="video/mp4,video/quicktime"
+                      maxBytes={100 * MB}
+                      folder={`/lessons/${program.id}`}
+                      onUpload={setLessonVideo.bind(null, l.id)}
+                      className={buttonVariants({ variant: "ghost", size: "icon" })}
+                    >
+                      <Upload />
+                      <span className="sr-only">{l.videoPath ? `Replace the video for ${l.title}` : `Upload a video for ${l.title}`}</span>
+                    </Uploader>
                     <ActionForm action={deleteLesson.bind(null, l.id)}>
                       <SubmitButton variant="ghost" size="icon" aria-label={`Delete ${l.title}`} confirm={`Delete "${l.title}"?`}>
                         <Trash2 />
@@ -150,7 +162,7 @@ function EditProgram({ program }: { program: Program }) {
                   <Plus /> Add lesson
                 </SubmitButton>
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">Video uploads (MP4 or MOV, stored privately) come with ImageKit.</p>
+              <p className="mt-2 text-xs text-muted-foreground">Then upload its video from the lesson row: MP4 or MOV, up to 100 MB, stored privately.</p>
             </ActionForm>
           </section>
         </div>
@@ -158,15 +170,19 @@ function EditProgram({ program }: { program: Program }) {
         <div className="space-y-6">
           <section className={card}>
             <h2 className="font-semibold">Cover image</h2>
-            {/* ponytail: inert until ImageKit uploads land */}
-            <label className="group relative mt-4 grid aspect-video cursor-pointer place-items-center overflow-hidden rounded-xl border-2 border-dashed text-center">
-              <input type="file" accept="image/*" className="sr-only" />
+            <Uploader
+              accept="image/jpeg,image/png"
+              maxBytes={5 * MB}
+              folder={`/covers/${program.id}`}
+              onUpload={setCover.bind(null, program.id)}
+              className="group mt-4 grid aspect-video place-items-center overflow-hidden rounded-xl border-2 border-dashed text-center"
+            >
               <ProgramCover program={program} sizes="340px" />
               <span className="relative flex flex-col items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium transition group-hover:bg-black/60 group-hover:text-white">
                 <ImagePlus className="size-5" />
                 <span className="sr-only group-hover:not-sr-only">{program.coverUrl ? "Replace image" : "Upload cover"}</span>
               </span>
-            </label>
+            </Uploader>
             <p className="mt-2 text-xs text-muted-foreground">16:9 · JPG or PNG · optimized automatically</p>
           </section>
 

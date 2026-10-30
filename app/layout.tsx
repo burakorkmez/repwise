@@ -22,10 +22,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
     >
       <head>
-        {/* Apply the saved theme before paint; dark is the default */}
+        {/* Apply the saved theme and its theme-color meta (read by ThemeToggle) before paint; dark is the default */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{document.documentElement.dataset.theme=localStorage.getItem("theme")||"dark"}catch(e){}`,
+            __html: `try{document.documentElement.dataset.theme=localStorage.getItem("theme")||"dark"}catch(e){}document.head.appendChild(Object.assign(document.createElement("meta"),{name:"theme-color",content:document.documentElement.dataset.theme==="dark"?"#0a0a0a":"#ffffff"}))`,
           }}
         />
       </head>

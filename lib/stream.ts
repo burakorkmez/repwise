@@ -3,13 +3,14 @@ import { eq } from "drizzle-orm"
 import { canMessage } from "@/lib/access"
 import { db } from "@/lib/db"
 import { profiles } from "@/lib/db/schema"
-import { isUuid } from "@/lib/utils"
+import { avatarUrl, isUuid } from "@/lib/utils"
 
 // Server-only: holds the API secret. One client for chat and video.
 export const stream = new StreamClient(process.env.NEXT_PUBLIC_STREAM_API_KEY!, process.env.STREAM_API_SECRET!)
 
 type Person = { userId: string; name: string; avatarUrl: string | null }
-const toStreamUser = (p: Person) => ({ id: p.userId, name: p.name, image: p.avatarUrl ?? undefined })
+// Stream needs an absolute image URL; the browser clients (messages, call) send the same one
+const toStreamUser = (p: Person) => ({ id: p.userId, name: p.name, image: avatarUrl(p.avatarUrl) })
 
 export async function streamToken(me: Person) {
   await stream.upsertUsers([toStreamUser(me)])

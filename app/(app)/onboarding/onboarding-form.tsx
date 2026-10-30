@@ -1,11 +1,14 @@
 "use client"
 
+import { useState } from "react"
 import { ArrowRight, Check, Dumbbell, ImagePlus, Trophy } from "lucide-react"
 import { createProfile } from "@/app/actions/profile"
 import { ActionForm, SubmitButton } from "@/components/action-form"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { MB, Uploader } from "@/components/uploader"
+import { UserAvatar } from "@/components/user-avatar"
 import { specialties } from "@/lib/specialties"
 
 const roles = [
@@ -15,6 +18,7 @@ const roles = [
 
 // Role switch is pure CSS: the form `group` reveals trainer fields when #role-trainer is checked
 export function OnboardingForm() {
+  const [avatar, setAvatar] = useState<string>()
   return (
     <ActionForm action={createProfile} className="group mx-auto max-w-3xl px-5 py-16">
       <p className="text-center text-xs font-semibold tracking-[0.3em] text-primary uppercase">Welcome to Repwise</p>
@@ -46,17 +50,21 @@ export function OnboardingForm() {
         <p className="mt-1 text-sm text-muted-foreground">This is what clients see in the directory. You can edit it anytime.</p>
 
         <div className="mt-6 grid gap-6">
-          {/* ponytail: inert until ImageKit uploads land (Phase 3); Google sign-ups keep their Google photo */}
-          <label className="flex cursor-pointer items-center gap-5">
-            <input type="file" accept="image/*" className="sr-only" />
-            <span className="grid size-20 place-items-center rounded-full border-2 border-dashed text-muted-foreground transition hover:border-primary hover:text-primary">
-              <ImagePlus className="size-6" />
-            </span>
+          {/* The upload's ImageKit path rides along in the form; Google sign-ups who skip it keep their Google photo */}
+          <Uploader accept="image/jpeg,image/png" maxBytes={5 * MB} folder="/avatars" onUpload={setAvatar} className="flex items-center gap-5">
+            {avatar ? (
+              <UserAvatar name="You" src={avatar} className="size-20" />
+            ) : (
+              <span className="grid size-20 place-items-center rounded-full border-2 border-dashed text-muted-foreground transition hover:border-primary hover:text-primary">
+                <ImagePlus className="size-6" />
+              </span>
+            )}
             <span>
-              <span className="block text-sm font-medium">Upload a profile photo</span>
+              <span className="block text-sm font-medium">{avatar ? "Change photo" : "Upload a profile photo"}</span>
               <span className="text-xs text-muted-foreground">JPG or PNG, up to 5 MB</span>
             </span>
-          </label>
+          </Uploader>
+          <input type="hidden" name="avatar" value={avatar ?? ""} />
 
           <div className="grid gap-2">
             <Label htmlFor="headline">Headline</Label>

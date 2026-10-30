@@ -1,8 +1,8 @@
 import type { Metadata } from "next"
-import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { Fragment, Suspense } from "react"
+import { Image } from "@imagekit/next"
 import { CalendarDays, Clock, MessageCircle, ShieldCheck, Star, Video } from "lucide-react"
 import { submitReview } from "@/app/actions/reviews"
 import { ActionForm, SubmitButton } from "@/components/action-form"
@@ -21,7 +21,7 @@ import { getUser } from "@/lib/auth"
 import { getTrainer, hasPurchasedFrom, trainerPrograms, trainerReviews } from "@/lib/queries"
 import { loadSlots } from "@/lib/realtime"
 import { specialtyLabel } from "@/lib/specialties"
-import { cn, initials, money } from "@/lib/utils"
+import { cn, imageProps, initials, money } from "@/lib/utils"
 
 type Props = PageProps<"/trainers/[id]">
 
@@ -61,7 +61,7 @@ async function Trainer({ params }: Pick<Props, "params">) {
       <section className="grid gap-10 lg:grid-cols-[minmax(0,420px)_1fr] lg:gap-16">
         <div className="relative aspect-4/5 overflow-hidden rounded-3xl border bg-accent">
           {trainer.avatarUrl ? (
-            <Image src={trainer.avatarUrl} alt={trainer.name} fill loading="eager" sizes="(min-width: 1024px) 420px, 100vw" className="object-cover" />
+            <Image {...imageProps(trainer.avatarUrl, [{ width: 600, height: 750 }])} alt={trainer.name} fill loading="eager" sizes="(min-width: 1024px) 420px, 100vw" className="object-cover" />
           ) : (
             <span className="grid h-full place-items-center font-heading text-8xl font-bold text-accent-foreground">{initials(trainer.name)}</span>
           )}

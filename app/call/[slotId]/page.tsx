@@ -7,6 +7,7 @@ import { LocalTime } from "@/components/local-time"
 import { requireUser } from "@/lib/auth"
 import { getCallSlot } from "@/lib/queries"
 import { ensureSessionCall } from "@/lib/stream"
+import { avatarUrl } from "@/lib/utils"
 import { CallRoom } from "./call-room"
 
 export const metadata: Metadata = { title: "Session" }
@@ -48,7 +49,7 @@ async function Session({ params }: Pick<PageProps<"/call/[slotId]">, "params">) 
 
       <main className="mx-3 mb-3 min-h-0 flex-1 overflow-hidden rounded-3xl border bg-card sm:mx-5 sm:mb-5">
         <CallRoom
-          user={{ id: me.id, name: self.name, image: self.avatarUrl ?? undefined }}
+          user={{ id: me.id, name: self.name, image: avatarUrl(self.avatarUrl) }}
           callId={slot.id}
           homeHref={asClient ? "/library" : "/dashboard"}
           chatHref={`/messages?c=${asClient ? trainer.id : client.id}`}

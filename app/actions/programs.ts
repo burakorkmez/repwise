@@ -5,6 +5,7 @@ import { refresh } from "next/cache"
 import { redirect } from "next/navigation"
 import { z } from "zod"
 import type { ActionResult } from "@/components/action-form"
+import { isFileIn } from "@/lib/access"
 import { requireTrainer } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { lessons, programs, purchases } from "@/lib/db/schema"
@@ -22,6 +23,9 @@ const parseProgram = (formData: FormData) =>
   programInput.safeParse({ title: formData.get("title"), description: formData.get("description"), price: formData.get("price") })
 
 const lessonTitle = z.string().trim().min(2, "Give the lesson a title").max(120)
+
+// A path the browser got back from ImageKit; it must sit in this program's own folder
+const uploadedTo = (folder: string) => z.string().refine((path) => isFileIn(folder, path), "Upload the file again")
 
 // Every write below scopes to the signed-in trainer's own programs
 const ownProgram = (id: string, trainerId: string) => and(eq(programs.id, id), eq(programs.trainerId, trainerId))
@@ -71,7 +75,22 @@ export async function deleteProgram(programId: string): Promise<ActionResult> {
   redirect("/dashboard/programs")
 }
 
-// ponytail: title only; the video upload (private ImageKit file) fills videoPath in the ImageKit phase
+export async function setCover(programId: string, path: string): Promise<ActionResult> {
+  const trainer = await requireTrainer()
+  if (!isUuid(programId)) return { error: "Program not found" }
+  const cover = uploadedTo(`/covers/${programId}`).safeParse(path)
+  if (!cover.success) return { error: cover.error.issues[0].message }
+
+  const updated = await db
+    .update(programs)
+    .set({ coverUrl: cover.data })
+    .where(ownProgram(programId, trainer.userId))
+    .returning({ id: programs.id })
+  if (!updated.length) return { error: "Program not found" }
+  refresh()
+}
+
+// Title only; the lesson row's upload button adds the video (setLessonVideo)
 export async function addLesson(programId: string, _state: ActionResult, formData: FormData): Promise<ActionResult> {
   const trainer = await requireTrainer()
   if (!isUuid(programId)) return { error: "Program not found" }
@@ -86,6 +105,23 @@ export async function addLesson(programId: string, _state: ActionResult, formDat
     title: title.data,
     position: sql`(select coalesce(max(${lessons.position}), 0) + 1 from ${lessons} where ${lessons.programId} = ${programId})`,
   })
+  refresh()
+}
+
+// The video is a private ImageKit file in /lessons/{programId}; only signLessonUrl hands out playable URLs
+export async function setLessonVideo(lessonId: string, path: string): Promise<ActionResult> {
+  const trainer = await requireTrainer()
+  if (!isUuid(lessonId)) return { error: "Lesson not found" }
+  const [lesson] = await db
+    .select({ programId: lessons.programId })
+    .from(lessons)
+    .innerJoin(programs, eq(programs.id, lessons.programId))
+    .where(and(eq(lessons.id, lessonId), eq(programs.trainerId, trainer.userId)))
+  if (!lesson) return { error: "Lesson not found" }
+  const video = uploadedTo(`/lessons/${lesson.programId}`).safeParse(path)
+  if (!video.success) return { error: video.error.issues[0].message }
+
+  await db.update(lessons).set({ videoPath: video.data }).where(eq(lessons.id, lessonId))
   refresh()
 }
 
